@@ -15,20 +15,32 @@ describe('main test suite', function () {
 
   this.timeout(60000);
 
-  it('sends a message back and forth', function () {
+  it('sends a message back and forth with postPromiseMessage', function () {
     var worker = new Worker(path + 'worker-pong.js');
     var promiseWorker = new PromiseWorker(worker);
 
-    return promiseWorker.postMessage('ping').then(function (res) {
+    return promiseWorker.postPromiseMessage('ping').then(function (res) {
       assert.equal(res, 'pong');
     });
   });
 
+  it('sends a message back and forth without postPromiseMessage', function () {
+    var worker = new Worker(path + 'worker-pong.js');
+    var promiseWorker = new PromiseWorker(worker);
+
+    promiseWorker.on('message', function(m){ 
+      assert.equal(m, 'pong');
+    });
+    
+    promiseWorker.postMessage('ping');
+      
+  });
+  
   it('echoes a message', function () {
     var worker = new Worker(path + 'worker-echo.js');
     var promiseWorker = new PromiseWorker(worker);
 
-    return promiseWorker.postMessage('ping').then(function (res) {
+    return promiseWorker.postPromiseMessage('ping').then(function (res) {
       assert.equal(res, 'ping');
     });
   });
@@ -37,7 +49,7 @@ describe('main test suite', function () {
     var worker = new Worker(path + 'worker-pong-promise.js');
     var promiseWorker = new PromiseWorker(worker);
 
-    return promiseWorker.postMessage('ping').then(function (res) {
+    return promiseWorker.postPromiseMessage('ping').then(function (res) {
       assert.equal(res, 'pong');
     });
   });
@@ -46,7 +58,7 @@ describe('main test suite', function () {
     var worker = new Worker(path + 'worker-pong-promise.js');
     var promiseWorker = new PromiseWorker(worker);
 
-    return promiseWorker.postMessage('ping').then(function (res) {
+    return promiseWorker.postPromiseMessage('ping').then(function (res) {
       assert.equal(res, 'pong');
     });
   });
@@ -62,7 +74,7 @@ describe('main test suite', function () {
     ];
 
     return Promise.all(words.map(function (word) {
-      return promiseWorker.postMessage(word).then(function (res) {
+      return promiseWorker.postPromiseMessage(word).then(function (res) {
         assert.equal(res, word);
       });
     }));
@@ -73,10 +85,10 @@ describe('main test suite', function () {
     var promiseWorker1 = new PromiseWorker(worker);
     var promiseWorker2 = new PromiseWorker(worker);
 
-    return promiseWorker1.postMessage('foo').then(function (res) {
+    return promiseWorker1.postPromiseMessage('foo').then(function (res) {
       assert.equal(res, 'foo');
     }).then(function () {
-      return promiseWorker2.postMessage('bar');
+      return promiseWorker2.postPromiseMessage('bar');
     }).then(function (res) {
       assert.equal(res, 'bar');
     });
@@ -94,10 +106,10 @@ describe('main test suite', function () {
     ];
 
     return Promise.all(promiseWorkers.map(function (promiseWorker, i) {
-      return promiseWorker.postMessage('foo' + i).then(function (res) {
+      return promiseWorker.postPromiseMessage('foo' + i).then(function (res) {
         assert.equal(res, 'foo' + i);
       }).then(function () {
-        return promiseWorker.postMessage('bar' + i);
+        return promiseWorker.postPromiseMessage('bar' + i);
       }).then(function (res) {
         assert.equal(res, 'bar' + i);
       });
@@ -108,7 +120,7 @@ describe('main test suite', function () {
     var worker = new Worker(path + 'worker-error-sync.js');
     var promiseWorker = new PromiseWorker(worker);
 
-    return promiseWorker.postMessage('foo').then(function () {
+    return promiseWorker.postPromiseMessage('foo').then(function () {
       throw new Error('expected an error here');
     }, function (err) {
       assert.equal(err.message, 'busted!');
@@ -119,7 +131,7 @@ describe('main test suite', function () {
     var worker = new Worker(path + 'worker-error-async.js');
     var promiseWorker = new PromiseWorker(worker);
 
-    return promiseWorker.postMessage('foo').then(function () {
+    return promiseWorker.postPromiseMessage('foo').then(function () {
       throw new Error('expected an error here');
     }, function (err) {
       assert.equal(err.message, 'oh noes');
@@ -130,7 +142,7 @@ describe('main test suite', function () {
     var worker = new Worker(path + 'worker-empty.js');
     var promiseWorker = new PromiseWorker(worker);
 
-    return promiseWorker.postMessage('ping').then(function () {
+    return promiseWorker.postPromiseMessage('ping').then(function () {
       throw new Error('expected an error here');
     }, function (err) {
       assert(err);
@@ -141,7 +153,7 @@ describe('main test suite', function () {
     var worker = new Worker(path + 'worker-echo-custom.js');
     var promiseWorker = new PromiseWorker(worker);
     return Promise.all([
-      promiseWorker.postMessage('ping'),
+      promiseWorker.postPromiseMessage('ping'),
       new Promise(function (resolve, reject) {
         function cleanup() {
           worker.removeEventListener('message', onMessage);
@@ -160,7 +172,7 @@ describe('main test suite', function () {
         }
         worker.addEventListener('error', onError);
         worker.addEventListener('message', onMessage);
-        worker.postMessage({hello: 'world'});
+        worker.postPromiseMessage({hello: 'world'});
       }).then(function (data) {
         assert.equal(data.hello, 'world');
       })
@@ -211,7 +223,7 @@ describe('service worker test suite', function () {
   it('echoes a message', function () {
     var promiseWorker = new PromiseWorker(worker);
 
-    return promiseWorker.postMessage('ping').then(function (res) {
+    return promiseWorker.postPromiseMessage('ping').then(function (res) {
       assert.equal(res, 'ping');
     });
   });
@@ -226,7 +238,7 @@ describe('service worker test suite', function () {
     ];
 
     return Promise.all(words.map(function (word) {
-      return promiseWorker.postMessage(word).then(function (res) {
+      return promiseWorker.postPromiseMessage(word).then(function (res) {
         assert.equal(res, word);
       });
     }));
