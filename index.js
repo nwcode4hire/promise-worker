@@ -45,7 +45,7 @@ function PromiseWorker(worker) {
   });
 }
 
-PromiseWorker.prototype.postMessage = function (userMessage) {
+PromiseWorker.prototype.postPromiseMessage = function (userMessage) {
   var self = this;
   var messageId = messageIds++;
 
