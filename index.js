@@ -49,7 +49,7 @@ PromiseWorker.prototype.postPromiseMessage = function (userMessage) {
   var self = this;
   var messageId = messageIds++;
 
-  var messageToSend = [messageId, userMessage];
+  var messageToSend = [messageId, userMessage, 'promiseWorker'];
 
   return new MyPromise(function (resolve, reject) {
     self._callbacks[messageId] = function (error, result) {
