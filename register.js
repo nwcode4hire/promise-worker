@@ -70,12 +70,16 @@ function registerPromiseWorker(callback) {
     }
     var messageId = payload[0];
     var message = payload[1];
-
-    if (typeof callback !== 'function') {
-      postOutgoingMessage(e, messageId, new Error(
-        'Please pass a function into register().'));
+    
+    if (payload[2]&& payload[2]==='promiseWorker') {
+      if (typeof callback !== 'function') {
+        postOutgoingMessage(e, messageId, new Error(
+          'Please pass a function into register().'));
+      } else {
+        handleIncomingMessage(e, callback, messageId, message);
+      }
     } else {
-      handleIncomingMessage(e, callback, messageId, message);
+      self.postMessage(message);
     }
   }
 
